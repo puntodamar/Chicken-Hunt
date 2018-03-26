@@ -1,115 +1,118 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class JumpSkill : ThrowObject, ISkill
+namespace Player.Skills
 {
-	public int remainingUsage		= 2;
-	public bool infiniteJump		= true;
-
-	public Text remainingUsageText;
-	public Image iconImage;
-	[HideInInspector]
-	public bool isFinished;
-	private PlayerMovement playerMovement;
-	private Animator playerAnimator;
-
-	protected override void Start()
+	public class JumpSkill : ThrowObject, ISkill
 	{
-		
-		base.Start();
-		isFinished				= true;
-		playerAnimator			= PlayerManager.Singleton.playerAnimator;
-		playerMovement			= GetComponent<PlayerMovement>();
-		//remainingUsageText		= GameObject.Find("RemainingJump").GetComponent<Text>();
-		remainingUsageText.text = remainingUsage.ToString();
-		PlayerManager.OnRespawn += ResetToRespawn;
-	}
+		public int RemainingUsage		= 2;
+		public bool InfiniteJump		= true;
 
-	public void Deactivate()
-	{
-		isFinished				= false;
-		lineRenderer.enabled	= false;
-		bullsEye.SetActive(false);
-		isBeingThrown			= false;
-	}
+		public Text RemainingUsageText;
+		public Image IconImage;
+		[HideInInspector]
+		public bool IsFinished;
+		private PlayerMovement _playerMovement;
+		private Animator _playerAnimator;
 
-	void Update()
-	{
-		if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump)
+		protected override void Start()
 		{
+		
+			base.Start();
+			IsFinished				= true;
+			_playerAnimator			= PlayerManager.Singleton.PlayerAnimator;
+			_playerMovement			= GetComponent<PlayerMovement>();
+			//remainingUsageText		= GameObject.Find("RemainingJump").GetComponent<Text>();
+			RemainingUsageText.text = RemainingUsage.ToString();
+			PlayerManager.OnRespawn += ResetToRespawn;
+		}
+
+		public void Deactivate()
+		{
+			IsFinished				= false;
+			LineRenderer.enabled	= false;
+			BullsEye.SetActive(false);
+			IsBeingThrown			= false;
+		}
+
+		void Update()
+		{
+			if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump)
+			{
 			
-			if (!isBeingThrown)
-			{
-				if (!bullsEye.activeInHierarchy)
-					bullsEye.SetActive(true);
-				if (!lineRenderer.enabled)
-					lineRenderer.enabled = true;
-			}
+				if (!IsBeingThrown)
+				{
+					if (!BullsEye.activeInHierarchy)
+						BullsEye.SetActive(true);
+					if (!LineRenderer.enabled)
+						LineRenderer.enabled = true;
+				}
 
 
-			launchPosition = transform.position;
+				LaunchPosition = transform.position;
 
-			if (!TargetAvailable())
-				SetTargetLocation();
+				if (!TargetAvailable())
+					SetTargetLocation();
 
-			if (Input.GetMouseButtonUp(0) && !hasTarget && !isBeingThrown)
-			{
-				bullsEye.SetActive(false);
-				hasTarget				= true;
-				lineRenderer.enabled	= false;				
-				isBeingThrown			= true;
-				isFinished				= false;
-				playerMovement.disabled = true;
+				if (Input.GetMouseButtonUp(0) && !HasTarget && !IsBeingThrown)
+				{
+					BullsEye.SetActive(false);
+					HasTarget				= true;
+					LineRenderer.enabled	= false;				
+					IsBeingThrown			= true;
+					IsFinished				= false;
+					_playerMovement.Disabled = true;
 
-				playerAnimator.SetBool("jumping", true);
-				transform.LookAt(target);
+					_playerAnimator.SetBool("jumping", true);
+					transform.LookAt(Target);
 				
 
+				}
 			}
+
 		}
 
-	}
-
-	private void OnCollisionEnter(Collision collision)
-	{
-		if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump && isBeingThrown)
+		private void OnCollisionEnter(Collision collision)
 		{
-			if (collision.gameObject.tag == "Ground")
+			if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump && IsBeingThrown)
 			{
-				Quaternion rotation		= transform.rotation;
-				playerAnimator.SetBool("jumping", false);
+				if (collision.gameObject.CompareTag("Ground"))
+				{
+					Quaternion rotation		= transform.rotation;
+					_playerAnimator.SetBool("jumping", false);
 
-				targetRigidbody.MoveRotation(rotation);
-				isBeingThrown			= false;				
-				playerMovement.disabled = false;
+					TargetRigidbody.MoveRotation(rotation);
+					IsBeingThrown			= false;				
+					_playerMovement.Disabled = false;
 
-				if (!PlayerSkillManager.Singleton.infiniteSkill)
-					remainingUsage--;
+					if (!PlayerSkillManager.Singleton.infiniteSkill)
+						RemainingUsage--;
 
-				remainingUsageText.text					= remainingUsage.ToString();
-				if (remainingUsage == 0)
-					iconImage.color = Color.grey;
+					RemainingUsageText.text					= RemainingUsage.ToString();
+					if (RemainingUsage == 0)
+						IconImage.color = Color.grey;
 
-				isFinished = true;
-				PlayerSkillManager.Singleton.skillInUse = SkillInUse.None;
+					IsFinished = true;
+					PlayerSkillManager.Singleton.skillInUse = SkillInUse.None;
+				}
 			}
 		}
-	}
 
-	private void OnTriggerEnter(Collider other)
-	{
-		if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump && isBeingThrown)
+		private void OnTriggerEnter(Collider other)
 		{
-			if (other.gameObject.tag == "Chicken")
+			if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump && IsBeingThrown)
 			{
-				Destroy(other.gameObject);
+				if (other.gameObject.CompareTag("Chicken"))
+				{
+					Destroy(other.gameObject);
+				}
 			}
 		}
-	}
 
-	public void ResetToRespawn()
-	{
-		Deactivate();
-		targetRigidbody.velocity = Vector3.zero;
+		public void ResetToRespawn()
+		{
+			Deactivate();
+			TargetRigidbody.velocity = Vector3.zero;
+		}
 	}
 }

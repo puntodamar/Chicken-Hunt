@@ -1,71 +1,72 @@
-﻿using UnityEngine.UI;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
-public class ThrowLure : ThrowObject, ISkill
+namespace Player.Skills
 {
-	public int remainingUsage = 2;
-	public Text remainingUsageText;
-	public Image iconImage;
-
-	protected override void Start()
+	public class ThrowLure : ThrowObject, ISkill
 	{
-		base.Start();
-		PlayerManager.OnRespawn += ResetToRespawn;
-		remainingUsageText.text = remainingUsage.ToString();
-	}
+		public int RemainingUsage = 2;
+		public Text RemainingUsageText;
+		public Image IconImage;
 
-	private void Update()
-	{
-		if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Lure)
+		protected override void Start()
 		{
-			if (!isBeingThrown)
-			{
-				if (!bullsEye.activeInHierarchy)
-					bullsEye.SetActive(true);
+			base.Start();
+			PlayerManager.OnRespawn += ResetToRespawn;
+			RemainingUsageText.text = RemainingUsage.ToString();
+		}
 
-				if (!lineRenderer.enabled)
-					lineRenderer.enabled = true;
+		private void Update()
+		{
+			if (PlayerSkillManager.Singleton.skillInUse != SkillInUse.Lure) return;
+			if (!IsBeingThrown)
+			{
+				if (!BullsEye.activeInHierarchy)
+					BullsEye.SetActive(true);
+
+				if (!LineRenderer.enabled)
+					LineRenderer.enabled = true;
 			}
 
-			launchPosition = transform.position;
+			LaunchPosition = transform.position;
 
 			if (!TargetAvailable())
 				SetTargetLocation();
 
-			if (Input.GetMouseButtonUp(0) && !hasTarget && !isBeingThrown)
+			if (Input.GetMouseButtonUp(0) && !HasTarget && !IsBeingThrown)
 			{
-				hasTarget = true;
-				isBeingThrown = true;
-				lineRenderer.enabled = false;
-				bullsEye.SetActive(false);
-				launchPosition = transform.position + Vector3.up * 2;
-				targetRigidbody = Instantiate(objectToThrow, launchPosition, Quaternion.identity).GetComponent<Rigidbody>();
+				HasTarget = true;
+				IsBeingThrown = true;
+				LineRenderer.enabled = false;
+				BullsEye.SetActive(false);
+				LaunchPosition = transform.position + Vector3.up * 2;
+				TargetRigidbody = Instantiate(ObjectToThrow, LaunchPosition, Quaternion.identity).GetComponent<Rigidbody>();
 				Throw();
-				hasTarget = false;
+				HasTarget = false;
 				if (!PlayerSkillManager.Singleton.infiniteSkill)
-					remainingUsage--;
+					RemainingUsage--;
 
-				remainingUsageText.text = remainingUsage.ToString();
+				RemainingUsageText.text = RemainingUsage.ToString();
 
-				if (remainingUsage == 0)
-					iconImage.color = Color.gray;
+				if (RemainingUsage == 0)
+					IconImage.color = Color.gray;
 
 				PlayerSkillManager.Singleton.skillInUse = SkillInUse.None;
 				Deactivate();
 
 			}
 		}
-	}
 
-	public void Deactivate()
-	{
-		lineRenderer.enabled = false;
-		bullsEye.SetActive(false);
-		isBeingThrown = false;
-	}
+		public void Deactivate()
+		{
+			LineRenderer.enabled = false;
+			BullsEye.SetActive(false);
+			IsBeingThrown = false;
+		}
 
-	public void ResetToRespawn()
-	{
-		Deactivate();
+		public void ResetToRespawn()
+		{
+			Deactivate();
+		}
 	}
 }

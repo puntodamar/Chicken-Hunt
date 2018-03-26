@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-	public bool isPlayer = false;
-	public int health;
+	public bool IsPlayer = false;
+	public int CurrentHealth;
 	public static event System.Action OnPlayerTakeDamage;
 
 	public int GetCurrentHealth()
-	{ return health; }
+	{ return CurrentHealth; }
 
 	public void TakeDamage(int damage)
 	{
-		GameUIManager.Singleton.SubstractPlayerHealth(health, damage);
-		health -= damage;
+		GameUIManager.Singleton.SubstractPlayerHealth(CurrentHealth, damage);
+		CurrentHealth -= damage;
 		//Debug.Log("take damage");
-		if (health < 0) health = 0;
-		if (OnPlayerTakeDamage != null && isPlayer)
+		if (CurrentHealth < 0) CurrentHealth = 0;
+		if (OnPlayerTakeDamage != null && IsPlayer)
 			OnPlayerTakeDamage();
 
 		

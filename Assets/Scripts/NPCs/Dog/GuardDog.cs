@@ -1,148 +1,159 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class GuardDog : Guard
+namespace NPCs.Dog
 {
-	public int attemptsToSearchNearbyLocations = 3;
-
-	private DogFieldOfView fov;
-	private Vector3 lastSearchLocation = Vector3.zero;
-
-	protected override void Start()
+	public class GuardDog : Guard
 	{
-		base.Start();
-		fov		= GetComponentInChildren<DogFieldOfView>();
-		status	= GuardStatus.Patrolling;
+		public int AttemptsToSearchNearbyLocations = 3;
 
-		DogFieldOfView.OnDogHasSpottedPlayer += OnStartChasingPlayer;
-		DogFieldOfView.OnDogIsLosingPlayer += OnStartLosingPlayer;
-	}
+		private DogFieldOfView _fov;
+		private Vector3 _lastSearchLocation = Vector3.zero;
 
-	protected override void Update()
-	{
-		base.Update();
-
-		if (goingBackToWaypoint)
+		protected override void Start()
 		{
-			if (navMeshAgent.remainingDistance <= 1)
-			{
-				animator.SetBool("running", false);
-				status = GuardStatus.Patrolling;
-				navMeshAgent.speed = originalSpeed;
-				goingBackToWaypoint = false;
-			}
+			base.Start();
+			_fov		= GetComponentInChildren<DogFieldOfView>();
+			status	= GuardStatus.Patrolling;
+
+			DogFieldOfView.OnDogHasSpottedPlayer += OnStartChasingPlayer;
+			DogFieldOfView.OnDogIsLosingPlayer += OnStartLosingPlayer;
 		}
 
-		if(status == GuardStatus.Distracted && lostInterestToDistractor > 0)
+		protected override void Update()
 		{
-			if(navMeshAgent.remainingDistance == 0)
+			base.Update();
+
+			if (goingBackToWaypoint)
 			{
-				lostInterestToDistractor -= Time.deltaTime;
-				animator.SetFloat("speed", 0);
+				if (NavMeshAgent.remainingDistance <= 1)
+				{
+					Animator.SetBool("running", false);
+					status = GuardStatus.Patrolling;
+					NavMeshAgent.speed = OriginalSpeed;
+					goingBackToWaypoint = false;
+				}
 			}
+
+			if(status == GuardStatus.Distracted && lostInterestToDistractor > 0)
+			{
+				if(NavMeshAgent.remainingDistance == 0)
+				{
+					lostInterestToDistractor -= Time.deltaTime;
+					Animator.SetFloat("speed", 0);
+				}
 				
+			}
+
+			if(lostInterestToDistractor <= 0 && status == GuardStatus.Distracted)
+				ResumePatrolling();
+
+//			if (status == GuardStatus.Pursuing)
+//			{
+//				if(NavMeshAgent.remainingDistance < 4f)
+//					NavMeshAgent.stoppingDistance = 5f;
+//				else NavMeshAgent.stoppingDistance = 0f;
+//			}
 		}
 
-		if(lostInterestToDistractor <= 0 && status == GuardStatus.Distracted)
+		IEnumerator GoToNextWaypoint()
+		{
+			status = GuardStatus.Idle;
+			Animator.SetFloat("speed", 0);
+			float randomIdleTime = Random.Range(MinMaxWaitBeforeMovingToNextWaypoint.x, MinMaxWaitBeforeMovingToNextWaypoint.y);
+			yield return new WaitForSecondsRealtime(randomIdleTime);
+		
+			CurrentWaypointIndex = (CurrentWaypointIndex + 1) % Waypoints.transform.childCount;
+			NavMeshAgent.SetDestination(Waypoints.GetChild(CurrentWaypointIndex).transform.position);
+			status = GuardStatus.Patrolling;
+		}
+
+		protected override void OnStartChasingPlayer()
+		{
+			base.OnStartChasingPlayer();
+			//NavMeshAgent.stoppingDistance = 4f;
+		}
+
+		protected IEnumerator LookingForPlayer()
+		{
+			int attempts = 1;
+			NavMeshAgent.stoppingDistance = 0;
+
+			while (attempts <= AttemptsToSearchNearbyLocations)
+			{
+				isLookingForPlayer = true;
+				yield return StartCoroutine(SearchRandomNearbyLocation());
+				attempts++;
+			}
+		
 			ResumePatrolling();
-	}
-
-	IEnumerator GoToNextWaypoint()
-	{
-		status = GuardStatus.Idle;
-		animator.SetFloat("speed", 0);
-		float randomIdleTime = Random.Range(minMaxWaitBeforeMovingToNextWaypoint.x, minMaxWaitBeforeMovingToNextWaypoint.y);
-		yield return new WaitForSecondsRealtime(randomIdleTime);
-		
-		currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.transform.childCount;
-		navMeshAgent.SetDestination(waypoints.GetChild(currentWaypointIndex).transform.position);
-		status = GuardStatus.Patrolling;
-	}
-
-	protected override void OnStartChasingPlayer()
-	{
-		base.OnStartChasingPlayer();
-	}
-
-	protected IEnumerator LookingForPlayer()
-	{
-		int attempts = 1;
-		navMeshAgent.stoppingDistance = 0;
-
-		while (attempts <= attemptsToSearchNearbyLocations)
-		{
-			isLookingForPlayer = true;
-			yield return StartCoroutine(SearchRandomNearbyLocation());
-			attempts++;
 		}
-		
-		ResumePatrolling();
-	}
 
-	protected virtual void ResumePatrolling()
-	{
-		lostInterestToDistractor	= 0;
-		isLookingForPlayer			= false;
-		status						= GuardStatus.Patrolling;	
-		goingBackToWaypoint			= true;
-		navMeshAgent.GoToShortestWaypointLocation(waypoints, ref currentWaypointIndex);
-	}
-
-	protected bool IsNavmeshPositionValid(Vector3 target)
-	{
-		NavMeshHit hit;
-		float distance = Vector3.Distance(target,transform.position);
-		if (NavMesh.SamplePosition(target, out hit, distance, 1))
+		protected virtual void ResumePatrolling()
 		{
-			return true;
+			NavMeshAgent.stoppingDistance = 0;
+			lostInterestToDistractor	= 0;
+			isLookingForPlayer			= false;
+			status						= GuardStatus.Patrolling;	
+			goingBackToWaypoint			= true;
+			NavMeshAgent.GoToShortestWaypointLocation(Waypoints, ref CurrentWaypointIndex);
 		}
+
+		protected bool IsNavmeshPositionValid(Vector3 target)
+		{
+			NavMeshHit hit;
+			float distance = Vector3.Distance(target,transform.position);
+			if (NavMesh.SamplePosition(target, out hit, distance, 1))
+			{
+				return true;
+			}
 			
-		else return false;
-	}
-
-	protected IEnumerator SearchRandomNearbyLocation()
-	{
-		Vector3 randomLocation					= Vector3.zero;
-		float distanceFromCurrentLocation		= 0;
-		do
-		{
-			randomLocation					= lastKnownPlayerPosition + (Vector3)Random.insideUnitCircle * searchPlayerRadius;
-			distanceFromCurrentLocation		= Vector3.Distance(transform.position, randomLocation);
-
-			lastSearchLocation = randomLocation;
+			else return false;
 		}
-		while (!IsNavmeshPositionValid(randomLocation) && distanceFromCurrentLocation < minimumSearchDistance);
 
-		navMeshAgent.destination = randomLocation;
-
-		while (isLookingForPlayer)
+		protected IEnumerator SearchRandomNearbyLocation()
 		{
-			yield return null;
+			Vector3 randomLocation					= Vector3.zero;
+			float distanceFromCurrentLocation		= 0;
+			do
+			{
+				randomLocation					= lastKnownPlayerPosition + (Vector3)Random.insideUnitCircle * searchPlayerRadius;
+				distanceFromCurrentLocation		= Vector3.Distance(transform.position, randomLocation);
+
+				_lastSearchLocation = randomLocation;
+			}
+			while (!IsNavmeshPositionValid(randomLocation) && distanceFromCurrentLocation < minimumSearchDistance);
+
+			NavMeshAgent.destination = randomLocation;
+
+			while (isLookingForPlayer)
+			{
+				yield return null;
+			}
 		}
-	}
 
-	protected override void OnStartLosingPlayer()
-	{
-		base.OnStartLosingPlayer();
-		StartCoroutine(LookingForPlayer());
-		navMeshAgent.GoToShortestWaypointLocation(waypoints, ref currentWaypointIndex);
-		//navMeshAgent.destination	= navMeshAgent.getsho(transform, waypoints, ref currentWaypointIndex);
-		goingBackToWaypoint			= true;
-	}
+		protected override void OnStartLosingPlayer()
+		{
+			base.OnStartLosingPlayer();
+			StartCoroutine(LookingForPlayer());
+			NavMeshAgent.GoToShortestWaypointLocation(Waypoints, ref CurrentWaypointIndex);
+			//navMeshAgent.destination	= navMeshAgent.getsho(transform, waypoints, ref currentWaypointIndex);
+			goingBackToWaypoint			= true;
+		}
 
-	public override void DistractedTo(GameObject obj, float time)
-	{
-		base.DistractedTo(obj, time);
+		public override void DistractedTo(GameObject obj, float time)
+		{
+			base.DistractedTo(obj, time);
 
-		if (!IsNavmeshPositionValid(obj.transform.position)) return;
+			if (!IsNavmeshPositionValid(obj.transform.position)) return;
 
-		StopCoroutine(LookingForPlayer());
-		StopCoroutine(GoToNextWaypoint());
+			StopCoroutine(LookingForPlayer());
+			StopCoroutine(GoToNextWaypoint());
 
-		animator.SetFloat("speed", 1);
-		navMeshAgent.SetDestination(obj.transform.position);
-		lostInterestToDistractor = time;
+			Animator.SetFloat("speed", 1);
+			NavMeshAgent.SetDestination(obj.transform.position);
+			lostInterestToDistractor = time;
+		}
 	}
 }

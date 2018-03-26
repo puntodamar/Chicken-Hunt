@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Player.Skills;
 using UnityEngine;
 
 public enum SkillInUse { None, Jump, ThrowStone, Lure, Run }
@@ -30,11 +31,11 @@ public class PlayerSkillManager : MonoBehaviour
 
 	private void Update()
 	{
-		if (PlayerManager.Singleton.isRespawning) return;
+		if (PlayerManager.Singleton.IsRespawning) return;
 
-		if (Input.GetKeyDown(KeyCode.Q) && jumpSkill.isFinished)
+		if (Input.GetKeyDown(KeyCode.Q) && jumpSkill.IsFinished)
 		{
-			if (jumpSkill.remainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
+			if (jumpSkill.RemainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
 			{
 				skillInUse = SkillInUse.Jump;
 			}
@@ -53,7 +54,7 @@ public class PlayerSkillManager : MonoBehaviour
 		}
 		else if (Input.GetKeyDown(KeyCode.Alpha2))
 		{
-			if (throwStoneSkill.remainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
+			if (throwStoneSkill.RemainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
 			{
 				//SwapSkill(jumpSkill);
 				skillInUse = SkillInUse.ThrowStone;
@@ -72,7 +73,7 @@ public class PlayerSkillManager : MonoBehaviour
 		}
 		else if (Input.GetKeyDown(KeyCode.Alpha3))
 		{
-			if (throwLureSkill.remainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
+			if (throwLureSkill.RemainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
 			{
 				//SwapSkill(jumpSkill);
 				skillInUse = SkillInUse.Lure;

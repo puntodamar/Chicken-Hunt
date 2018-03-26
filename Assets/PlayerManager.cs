@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Player;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
@@ -11,21 +12,21 @@ public class PlayerManager : MonoBehaviour
 {
 	public static PlayerManager Singleton;
 	public static event System.Action OnRespawn;
-	public Vector3 initialPosition;	
+	public Vector3 InitialPosition;	
 
 	[HideInInspector]
-	public Rigidbody playerRigidbody;
+	public Rigidbody PlayerRigidbody;
 
 	[HideInInspector]
-	public Animator playerAnimator;
+	public Animator PlayerAnimator;
 
 	[HideInInspector]
-	public PlayerMovement playerMovement;
+	public PlayerMovement PlayerMovement;
 
 	[HideInInspector]
-	public PlayerSkillManager playerSkillManager;
+	public PlayerSkillManager PlayerSkillManager;
 
-	public bool isRespawning = false;
+	public bool IsRespawning = false;
 
 	private void Awake()
 	{
@@ -37,15 +38,15 @@ public class PlayerManager : MonoBehaviour
 
 	private void Start()
 	{
-		playerRigidbody		= GetComponent<Rigidbody>();
-		playerAnimator		= GetComponent<Animator>();
-		playerMovement		= GetComponent<PlayerMovement>();
-		playerSkillManager	= GetComponent<PlayerSkillManager>();
-		initialPosition		= transform.position;
+		PlayerRigidbody		= GetComponent<Rigidbody>();
+		PlayerAnimator		= GetComponent<Animator>();
+		PlayerMovement		= GetComponent<PlayerMovement>();
+		PlayerSkillManager	= GetComponent<PlayerSkillManager>();
+		InitialPosition		= transform.position;
 	}
 
 	public void Respawn()
 	{
-		isRespawning = false;
+		IsRespawning = false;
 	}
 }

@@ -1,53 +1,57 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(PlayerManager))]
-public class PlayerMovement : MonoBehaviour
+namespace Player
 {
-	public float moveSpeed			= 7f;
-	public float smoothMoveTime		= .1f;
-	public float turnSpeed			= 8;
-	public bool disabled			= false;
-
-	private float angle;
-	private float smoothInputMagnitude;
-	private float smoothMoveVelocity;
-	private Vector3 velocity;
-	private new Rigidbody rigidbody;
-	private Animator animator;
-
-	void Start()
+	[RequireComponent(typeof(PlayerManager))]
+	public class PlayerMovement : MonoBehaviour
 	{
-		rigidbody	= PlayerManager.Singleton.playerRigidbody;
-		animator	= PlayerManager.Singleton.playerAnimator;
-	}
+		public float MoveSpeed			= 7f;
+		public float SmoothMoveTime		= .1f;
+		public float TurnSpeed			= 8;
+		public bool Disabled			= false;
 
-	void Update ()
-	{
-		if (PlayerManager.Singleton.isRespawning) return;
+		private float _angle;
+		private float _smoothInputMagnitude;
+		private float _smoothMoveVelocity;
+		private Vector3 _velocity;
+		private new Rigidbody _rigidbody;
+		private Animator _animator;
 
-		Vector3 inputDirection = Vector3.zero;
-		if (!disabled)
+		void Start()
 		{
-			
-			inputDirection			= new Vector3 (Input.GetAxisRaw ("Vertical1"), 0, -Input.GetAxisRaw ("Horizontal1")).normalized;
-			float inputMagnitude	= inputDirection.magnitude;
-			animator.SetFloat("speed", inputMagnitude);
-			smoothInputMagnitude	= Mathf.SmoothDamp(smoothInputMagnitude, inputMagnitude, ref smoothMoveVelocity, smoothMoveTime);
-
-			float targetAngle		= Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
-			angle					= Mathf.LerpAngle(angle, targetAngle, Time.deltaTime * turnSpeed * inputMagnitude);
+			_rigidbody	= PlayerManager.Singleton.PlayerRigidbody;
+			_animator	= PlayerManager.Singleton.PlayerAnimator;
 		}
-		velocity			= transform.forward * moveSpeed * smoothInputMagnitude;
 
-
-	}
-
-	void FixedUpdate()
-	{
-		if (!disabled)
+		void Update ()
 		{
-			rigidbody.MoveRotation(Quaternion.Euler(Vector3.up * angle));
-			rigidbody.MovePosition(rigidbody.position + velocity * Time.deltaTime);
+		
+			if (PlayerManager.Singleton.IsRespawning) return;
+
+			Vector3 inputDirection = Vector3.zero;
+			if (!Disabled)
+			{
+			
+				inputDirection			= new Vector3 (Input.GetAxisRaw ("Vertical1"), 0, -Input.GetAxisRaw ("Horizontal1")).normalized;
+				float inputMagnitude	= inputDirection.magnitude;
+				_animator.SetFloat("speed", inputMagnitude);
+				_smoothInputMagnitude	= Mathf.SmoothDamp(_smoothInputMagnitude, inputMagnitude, ref _smoothMoveVelocity, SmoothMoveTime);
+
+				float targetAngle		= Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
+				_angle					= Mathf.LerpAngle(_angle, targetAngle, Time.deltaTime * TurnSpeed * inputMagnitude);
+			}
+			_velocity			= transform.forward * MoveSpeed * _smoothInputMagnitude;
+
+
+		}
+
+		void FixedUpdate()
+		{
+			if (!Disabled)
+			{
+				_rigidbody.MoveRotation(Quaternion.Euler(Vector3.up * _angle));
+				_rigidbody.MovePosition(_rigidbody.position + _velocity * Time.deltaTime);
+			}
 		}
 	}
 }

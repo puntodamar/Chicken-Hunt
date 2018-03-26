@@ -9,6 +9,6 @@ public class DistractorEditor : Editor
 		Distractor distractor = (Distractor)target;
 		Handles.color = Color.white;
 
-		Handles.DrawWireArc(distractor.transform.position, Vector3.up, Vector3.forward, 360, distractor.radius);
+		Handles.DrawWireArc(distractor.transform.position, Vector3.up, Vector3.forward, 360, distractor.Radius);
 	}
 }

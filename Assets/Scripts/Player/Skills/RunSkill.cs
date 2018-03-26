@@ -2,82 +2,85 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RunSkill : MonoBehaviour, ISkill
+namespace Player.Skills
 {
-	public int cooldown				= 30;
-	public bool canRun				= true;
-	public bool isRunning			= false;
-	public int runBoostMultiplier	= 2;
-	public int maximumRunTime		= 1;
-
-	private Image runCooldownSlider;
-	private float originalMoveSpeed;
-	public PlayerMovement playerMovement;
-	private Animator animator;
-
-	void Start()
+	public class RunSkill : MonoBehaviour, ISkill
 	{
-		playerMovement			= GetComponent<PlayerMovement>();
-		animator				= PlayerManager.Singleton.playerAnimator;		
-		runCooldownSlider		= GameObject.Find("RunCooldownSlider").GetComponent<Image>();
-		if (PlayerSkillManager.Singleton.infiniteSkill)
-			cooldown = 2;
-	}
+		public int Cooldown				= 30;
+		public bool CanRun				= true;
+		public bool IsRunning			= false;
+		public int RunBoostMultiplier	= 2;
+		public int MaximumRunTime		= 1;
+		public PlayerMovement PlayerMovement;
+		
+		private Image _runCooldownSlider;
+		private float _originalMoveSpeed;
+		
+		private Animator _animator;
 
-	public void Activate()
-	{
-		if (canRun && !isRunning)
+		private void Start()
 		{
-			isRunning						= true;
-			canRun							= false;
-			originalMoveSpeed				= playerMovement.moveSpeed;
-			playerMovement.moveSpeed		= playerMovement.moveSpeed * runBoostMultiplier;
-			runCooldownSlider.fillAmount	= 0;
+			PlayerMovement			= GetComponent<PlayerMovement>();
+			_animator				= PlayerManager.Singleton.PlayerAnimator;		
+			_runCooldownSlider		= GameObject.Find("RunCooldownSlider").GetComponent<Image>();
+			if (PlayerSkillManager.Singleton.infiniteSkill)
+				Cooldown = 2;
+		}
 
-			animator.SetBool("running", true);
+		public void Activate()
+		{
+			if (!CanRun || IsRunning) return;
+			
+			IsRunning						= true;
+			CanRun							= false;
+			_originalMoveSpeed				= PlayerMovement.MoveSpeed;
+			PlayerMovement.MoveSpeed		= PlayerMovement.MoveSpeed * RunBoostMultiplier;
+			_runCooldownSlider.fillAmount	= 0;
+
+			_animator.SetBool("running", true);
 			StartCoroutine(Exhausted());
 			StartCoroutine(CountdownCooldown());
 		}
-	}
 
-	IEnumerator Exhausted()
-	{
-		yield return new WaitForSecondsRealtime(maximumRunTime);
-
-		while(playerMovement.moveSpeed > originalMoveSpeed)
+		IEnumerator Exhausted()
 		{
-			playerMovement.moveSpeed = Mathf.Lerp(playerMovement.moveSpeed, originalMoveSpeed, maximumRunTime);
-			yield return new WaitForSeconds(.1f);
+			yield return new WaitForSecondsRealtime(MaximumRunTime);
+
+			while(PlayerMovement.MoveSpeed > _originalMoveSpeed)
+			{
+				PlayerMovement.MoveSpeed = Mathf.Lerp(PlayerMovement.MoveSpeed, _originalMoveSpeed, MaximumRunTime);
+				yield return new WaitForSeconds(.1f);
+			}
+			IsRunning = false;
+			_animator.SetBool("running", false);
+
 		}
-		isRunning = false;
-		animator.SetBool("running", false);
 
-	}
-
-	IEnumerator CountdownCooldown()
-	{
-		float currentCooldownTime = 0f;
-		while(currentCooldownTime < cooldown)
+		private IEnumerator CountdownCooldown()
 		{
-			currentCooldownTime += 1;
-			runCooldownSlider.fillAmount = currentCooldownTime/cooldown;
+			float currentCooldownTime = 0f;
+			while(currentCooldownTime < Cooldown)
+			{
+				currentCooldownTime += 1;
+				_runCooldownSlider.fillAmount = currentCooldownTime/Cooldown;
 
-			yield return new WaitForSecondsRealtime(1);
+				yield return new WaitForSecondsRealtime(1);
 			
+			}
+
+			CanRun = true;
+
 		}
 
-		canRun = true;
+		public void Deactivate()
+		{
+			IsRunning = false;
+			_animator.SetBool("running", false);
+		}
 
-	}
-
-	public void Deactivate()
-	{
-		isRunning = false;
-		animator.SetBool("running", false);
-	}
-
-	public void ResetToRespawn()
-	{
-		Deactivate();
+		public void ResetToRespawn()
+		{
+			Deactivate();
+		}
 	}
 }

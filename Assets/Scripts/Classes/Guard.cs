@@ -29,24 +29,24 @@ public class Guard: NPC
 	{
 		if (status == GuardStatus.Patrolling)
 		{
-			if(navMeshAgent.remainingDistance <= .2f)
-				animator.SetFloat("speed", 0);
+			if(NavMeshAgent.remainingDistance <= .2f)
+				Animator.SetFloat("speed", 0);
 
-			if (navMeshAgent.remainingDistance <= 0)
+			if (NavMeshAgent.remainingDistance <= 0)
 				StartCoroutine(GoToNextWaypoint());
 
-			else animator.SetFloat("speed", 1);
+			else Animator.SetFloat("speed", 1);
 		}
 
 		if(status == GuardStatus.Pursuing)
 		{
-			timeToUpdateNavmeshDestination += Time.deltaTime;
-			animator.SetFloat("speed", 1);
-			if (timeToUpdateNavmeshDestination >= navmeshUpdateRate && navMeshAgent.destination != player.transform.position)
+			TimeToUpdateNavmeshDestination += Time.deltaTime;
+			Animator.SetFloat("speed", 1);
+			if (TimeToUpdateNavmeshDestination >= NavmeshUpdateRate && NavMeshAgent.destination != Player.transform.position)
 			{
-				lastKnownPlayerPosition = player.transform.position;
-				navMeshAgent.destination = lastKnownPlayerPosition;
-				timeToUpdateNavmeshDestination = 0;
+				lastKnownPlayerPosition = Player.transform.position;
+				NavMeshAgent.destination = lastKnownPlayerPosition;
+				TimeToUpdateNavmeshDestination = 0;
 			}
 		}
 	}
@@ -55,27 +55,27 @@ public class Guard: NPC
 	{
 		status = GuardStatus.Idle;
 		
-		float randomIdleTime = Random.Range(minMaxWaitBeforeMovingToNextWaypoint.x, minMaxWaitBeforeMovingToNextWaypoint.y);
+		float randomIdleTime = Random.Range(MinMaxWaitBeforeMovingToNextWaypoint.x, MinMaxWaitBeforeMovingToNextWaypoint.y);
 		yield return new WaitForSecondsRealtime(randomIdleTime);
 
-		currentWaypointIndex	= (currentWaypointIndex + 1) % waypoints.transform.childCount;
+		CurrentWaypointIndex	= (CurrentWaypointIndex + 1) % Waypoints.transform.childCount;
 		status					= GuardStatus.Patrolling;
-		navMeshAgent.SetDestination(waypoints.GetChild(currentWaypointIndex).transform.position);
+		NavMeshAgent.SetDestination(Waypoints.GetChild(CurrentWaypointIndex).transform.position);
 		
 	}
 
 	protected virtual void OnStartChasingPlayer()
 	{
-		animator.SetBool("running", true);
+		Animator.SetBool("running", true);
 		status = GuardStatus.Pursuing;
-		navMeshAgent.speed = runSpeed;
-		navMeshAgent.SetDestination(player.transform.position);
+		NavMeshAgent.speed = runSpeed;
+		NavMeshAgent.SetDestination(Player.transform.position);
 	}
 
 	protected virtual void OnStartLosingPlayer()
 	{
 		status = GuardStatus.Searching;
-		navMeshAgent.stoppingDistance = 0;
+		NavMeshAgent.stoppingDistance = 0;
 	}
 
 	public override void DistractedTo(GameObject obj, float time)

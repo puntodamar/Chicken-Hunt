@@ -1,44 +1,45 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using NPCs.Chicken;
 using UnityEngine;
 
 public class Corn : Distractor
 {
-	public int health = 100;
-	private new Rigidbody rigidbody;
-	private bool isOnGround = false;
+	public int Health = 100;
+	private new Rigidbody _rigidbody;
+	private bool _isOnGround = false;
 	private void Start()
 	{
-		rigidbody = GetComponent<Rigidbody>();
+		_rigidbody = GetComponent<Rigidbody>();
 	}
 
 	private void Update()
 	{
-		if (isOnGround)
+		if (_isOnGround)
 		{
-			Collider[] agentsWithinDistractorRange = Physics.OverlapSphere(transform.position, radius, agentsToDistract);
+			Collider[] agentsWithinDistractorRange = Physics.OverlapSphere(transform.position, Radius, AgentsToDistract);
 
 			foreach (Collider agent in agentsWithinDistractorRange)
 			{
 				Chicken chicken = agent.gameObject.GetComponent<Chicken>();
-				if (chicken.status == ChickenStatus.Lured) continue;
+				if (chicken.ChickenState == ChickenState.Lured) continue;
 
 				chicken.DistractedTo(this.gameObject);
 			}
 
-			if (rigidbody.velocity != Vector3.zero)
-				rigidbody.velocity = Vector3.zero;
+			if (_rigidbody.velocity != Vector3.zero)
+				_rigidbody.velocity = Vector3.zero;
 		}
 
-		if (health == 0)
+		if (Health == 0)
 			Destroy(gameObject);
 	}
 
 	private void OnCollisionEnter(Collision collision)
 	{
-		if(collision.gameObject.tag == "Ground")
+		if(collision.gameObject.CompareTag("Ground"))
 		{
-			isOnGround = true;
+			_isOnGround = true;
 		}
 	}
 }

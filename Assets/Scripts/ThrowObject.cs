@@ -3,40 +3,40 @@
 [RequireComponent(typeof(LineRenderer))]
 public class ThrowObject : MonoBehaviour
 {
-	public Transform objectToThrow;
-	public int lineRendererCount	= 30;
-	public float throwHeight		= 25;
-	public float gravity			= -18;
-	public float radius				= 10f;
-	public new Camera camera;
+	public Transform ObjectToThrow;
+	public int LineRendererCount	= 30;
+	public float ThrowHeight		= 25;
+	public float Gravity			= -18;
+	public float Radius				= 10f;
+	public new Camera Camera;
 
-	protected Vector3 launchPosition;
-	protected Transform target;
-	protected GameObject bullsEye;
-	protected LineRenderer lineRenderer;
+	protected Vector3 LaunchPosition;
+	protected Transform Target;
+	protected GameObject BullsEye;
+	protected LineRenderer LineRenderer;
 
-	protected bool isBeingThrown		= false;
-	protected bool hasTarget			= false;
-	protected Rigidbody targetRigidbody;
+	protected bool IsBeingThrown		= false;
+	protected bool HasTarget			= false;
+	protected Rigidbody TargetRigidbody;
 
 	protected virtual void Start()
 	{
 		//dadad
-		targetRigidbody				= objectToThrow.GetComponent<Rigidbody>();
-		bullsEye					= GameObject.Find("BullsEye");
-		target						= bullsEye.transform;
-		lineRenderer				= GetComponent<LineRenderer>();
-		lineRenderer.positionCount	= lineRendererCount;
-		launchPosition				= transform.position;
-		lineRenderer.enabled		= false;
+		TargetRigidbody				= ObjectToThrow.GetComponent<Rigidbody>();
+		BullsEye					= GameObject.Find("BullsEye");
+		Target						= BullsEye.transform;
+		LineRenderer				= GetComponent<LineRenderer>();
+		LineRenderer.positionCount	= LineRendererCount;
+		LaunchPosition				= transform.position;
+		LineRenderer.enabled		= false;
 	}
 
 	protected bool TargetAvailable()
 	{
-		if (hasTarget)
+		if (HasTarget)
 		{
 			Throw();
-			hasTarget = false;
+			HasTarget = false;
 			return true;
 		}
 		else return false;
@@ -44,10 +44,10 @@ public class ThrowObject : MonoBehaviour
 
 	protected void SetTargetLocation()
 	{
-		if (!bullsEye.activeInHierarchy && !isBeingThrown && PlayerSkillManager.Singleton.skillInUse != SkillInUse.None)
-			bullsEye.SetActive(true);
+		if (!BullsEye.activeInHierarchy && !IsBeingThrown && PlayerSkillManager.Singleton.skillInUse != SkillInUse.None)
+			BullsEye.SetActive(true);
 
-		Ray cameraRay = camera.ScreenPointToRay(Input.mousePosition);
+		Ray cameraRay = Camera.ScreenPointToRay(Input.mousePosition);
 		RaycastHit cameraRayHit;
 
 		if (Physics.Raycast(cameraRay, out cameraRayHit))
@@ -56,9 +56,9 @@ public class ThrowObject : MonoBehaviour
 			{
 				Vector3 targetPosition		= new Vector3(cameraRayHit.point.x, transform.position.y, cameraRayHit.point.z);
 				Vector3 direction			= targetPosition - transform.position;
-				direction					= Vector3.ClampMagnitude(direction, radius);
+				direction					= Vector3.ClampMagnitude(direction, Radius);
 				direction.y					= 0.2f;
-				bullsEye.transform.position = transform.position + direction;
+				BullsEye.transform.position = transform.position + direction;
 
 				DrawParabolicArc();
 			}
@@ -67,42 +67,42 @@ public class ThrowObject : MonoBehaviour
 
 	void DrawParabolicArc()
 	{
-		LaunchData launchData = CalculateLaunchData(targetRigidbody);
+		LaunchData launchData = CalculateLaunchData(TargetRigidbody);
 
-		for (int i = 0; i < lineRendererCount; i++)
+		for (int i = 0; i < LineRendererCount; i++)
 		{
-			float simulationTime	= i / (float)lineRendererCount * launchData.timeToTarget;
-			Vector3 displacement	= launchData.initialVelocity * simulationTime + Vector3.up * gravity * simulationTime * simulationTime / 2f;
-			Vector3 drawPoint		= launchPosition + displacement;
-			lineRenderer.SetPosition(i, drawPoint);
+			float simulationTime	= i / (float)LineRendererCount * launchData.timeToTarget;
+			Vector3 displacement	= launchData.initialVelocity * simulationTime + Vector3.up * Gravity * simulationTime * simulationTime / 2f;
+			Vector3 drawPoint		= LaunchPosition + displacement;
+			LineRenderer.SetPosition(i, drawPoint);
 		}
 	}
 
 	protected void Throw()
 	{
-		Physics.gravity				= Vector3.up * gravity;
-		targetRigidbody.useGravity	= true;
-		targetRigidbody.velocity	= CalculateLaunchData(targetRigidbody).initialVelocity;
+		Physics.gravity				= Vector3.up * Gravity;
+		TargetRigidbody.useGravity	= true;
+		TargetRigidbody.velocity	= CalculateLaunchData(TargetRigidbody).initialVelocity;
 	}
 
 	protected LaunchData CalculateLaunchData(Rigidbody rigidbody)
 	{
-		float displacementY		= target.position.y - launchPosition.y;
-		Vector3 displacementXZ	= new Vector3(target.position.x - launchPosition.x, 0, target.position.z - launchPosition.z);
-		float time				= Mathf.Sqrt(-2 * throwHeight / gravity) + Mathf.Sqrt(2 * (displacementY - throwHeight) / gravity);
-		Vector3 velocityY		= Vector3.up * Mathf.Sqrt(-2 * gravity * throwHeight);
+		float displacementY		= Target.position.y - LaunchPosition.y;
+		Vector3 displacementXZ	= new Vector3(Target.position.x - LaunchPosition.x, 0, Target.position.z - LaunchPosition.z);
+		float time				= Mathf.Sqrt(-2 * ThrowHeight / Gravity) + Mathf.Sqrt(2 * (displacementY - ThrowHeight) / Gravity);
+		Vector3 velocityY		= Vector3.up * Mathf.Sqrt(-2 * Gravity * ThrowHeight);
 		Vector3 velocityXZ		= displacementXZ / time;
 
-		return new LaunchData(velocityXZ + velocityY * -Mathf.Sign(gravity), time);
+		return new LaunchData(velocityXZ + velocityY * -Mathf.Sign(Gravity), time);
 	}
 
 	private void OnCollisionEnter(Collision collision)
 	{
-		if (isBeingThrown)
+		if (IsBeingThrown)
 		{
-			isBeingThrown			= false;
-			lineRenderer.enabled	= true;
-			bullsEye.SetActive(false);
+			IsBeingThrown			= false;
+			LineRenderer.enabled	= true;
+			BullsEye.SetActive(false);
 			PlayerSkillManager.Singleton.skillInUse = SkillInUse.None;
 		}	
 	}

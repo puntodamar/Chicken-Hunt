@@ -4,9 +4,9 @@ public class Stone : Distractor
 {
 	private void OnCollisionEnter(Collision collision)
 	{
-		if (collision.gameObject.tag == "Ground" || collision.gameObject.tag == "Guard")
+		if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Guard"))
 		{
-			Collider[] agentsWithinDistractorRange = Physics.OverlapSphere(transform.position, radius*2);
+			Collider[] agentsWithinDistractorRange = Physics.OverlapSphere(transform.position, Radius*2);
 
 			foreach (Collider agent in agentsWithinDistractorRange)
 			{
@@ -14,7 +14,7 @@ public class Stone : Distractor
 				if (guard == null) continue;
 				if (guard.canBeDistracted && (guard.status != GuardStatus.Pursuing && guard.status != GuardStatus.Distracted))
 				{
-					guard.DistractedTo(this.gameObject, distractionTime);
+					guard.DistractedTo(this.gameObject, DistractionTime);
 				}
 			}
 		}

@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class GameUIManager : MonoBehaviour
 {
-	public RectTransform healthbar;
+	public RectTransform Healthbar;
 	public static GameUIManager Singleton;
 
-	private float playerCurrentHealth;
-	private float playerMissingHealth;
-	private bool isSubstractingPlayerHealth;
+	private float _playerCurrentHealth;
+	private float _playerMissingHealth;
+	private bool _isSubstractingPlayerHealth;
 
 	private void Start()
 	{
@@ -22,28 +22,28 @@ public class GameUIManager : MonoBehaviour
 
 	public void SubstractPlayerHealth(int current, int missing)
 	{
-		playerCurrentHealth = current;
-		playerMissingHealth = current - missing;
+		_playerCurrentHealth = current;
+		_playerMissingHealth = current - missing;
 
-		if (!isSubstractingPlayerHealth)
+		if (!_isSubstractingPlayerHealth)
 			StartCoroutine(CrtSubstractPlayerHealth());
 	}
 
 	IEnumerator CrtSubstractPlayerHealth()
 	{
-		Image healthbarImage = healthbar.GetComponent<Image>();
+		Image healthbarImage = Healthbar.GetComponent<Image>();
 		
 
-		while(playerCurrentHealth > playerMissingHealth && playerCurrentHealth > 0)
+		while(_playerCurrentHealth > _playerMissingHealth && _playerCurrentHealth > 0)
 		{
-			playerCurrentHealth		= Mathf.Lerp(playerCurrentHealth, playerMissingHealth, .5f * Time.deltaTime);
-			healthbar.sizeDelta		= new Vector2(playerCurrentHealth*3, healthbar.sizeDelta.y);
-			float healthPercentage	= playerCurrentHealth / 100;
+			_playerCurrentHealth		= Mathf.Lerp(_playerCurrentHealth, _playerMissingHealth, .5f * Time.deltaTime);
+			Healthbar.sizeDelta		= new Vector2(_playerCurrentHealth*3, Healthbar.sizeDelta.y);
+			float healthPercentage	= _playerCurrentHealth / 100;
 			healthbarImage.color	= Color.Lerp(Color.red, Color.green, healthPercentage);
 			yield return null;
 		}
 
-		isSubstractingPlayerHealth = false;
+		_isSubstractingPlayerHealth = false;
 	}
 	
 }

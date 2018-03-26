@@ -1,17 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using NPCs.Dog;
 using UnityEngine;
+// ReSharper disable All
 
 public class AttackPlayer : MonoBehaviour
 {
-	public int attackDamage		= 10;
-	public float attackRadius	= .3f;
-	public float attackAngle	= 50f;
-	public LayerMask obstacleMask;
+	public int AttackDamage		= 10;
+	public float AttackRadius	= .3f;
+	public float AttackAngle	= 50f;
+	public LayerMask ObstacleMask;
 
-	protected Health playerHealth;
-	protected GameObject player;
-	protected float timeToAttack = 0;
+	protected Health PlayerHealth;
+	protected GameObject Player;
+	protected float TimeToAttack = 0;
 
 	protected virtual void Start()
 	{
@@ -22,7 +24,7 @@ public class AttackPlayer : MonoBehaviour
 
 	public virtual void Attack()
 	{
-		playerHealth.TakeDamage(attackDamage);
+		PlayerHealth.TakeDamage(AttackDamage);
 	}
 
 	//public Vector3 DirectionFromAngle(float angle, bool angleIsGlobal)
@@ -34,28 +36,20 @@ public class AttackPlayer : MonoBehaviour
 
 	protected bool CanAttackPlayer()
 	{
-		float distance = Vector3.Distance(transform.position, player.transform.position);
-		if (distance < attackRadius)
-		{
-			if (distance < .5f) return true;
+		float distance = Vector3.Distance(transform.position, Player.transform.position);
+		if (!(distance < AttackRadius)) return false;
+		if (distance < .5f) return true;
 
-			Vector3 dirToPlayer = (player.transform.position - transform.position).normalized;
+		Vector3 dirToPlayer 				= (Player.transform.position - transform.position).normalized;
+		float angleBetweenGuardAndPlayer 	= Vector3.Angle(transform.forward, dirToPlayer);
 
-			float angleBetweenGuardAndPlayer = Vector3.Angle(transform.forward, dirToPlayer);
-
-			if (angleBetweenGuardAndPlayer < attackAngle / 2f)
-			{
-				if (!Physics.Linecast(transform.position, player.transform.position, obstacleMask))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
+		if (!(angleBetweenGuardAndPlayer < AttackAngle / 2f)) return false;
+		
+		return !Physics.Linecast(transform.position, Player.transform.position, ObstacleMask);
 	}
 
 	private void OnStartLosingPlayer()
 	{
-		timeToAttack = 0;
+		TimeToAttack = 0;
 	}
 }

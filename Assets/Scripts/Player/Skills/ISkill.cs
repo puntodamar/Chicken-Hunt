@@ -1,5 +1,8 @@
-﻿public interface ISkill
+﻿namespace Player.Skills
 {
-	void Deactivate();
-	void ResetToRespawn();
+	public interface ISkill
+	{
+		void Deactivate();
+		void ResetToRespawn();
+	}
 }
