@@ -216,9 +216,11 @@
             <e p="NavMeshAgentExtensionMethods.cs" t="Include" />
             <e p="TransformExtensionMethods.cs" t="Include" />
           </e>
-          <e p="GameManager.cs" t="Include" />
-          <e p="GameUIManager.cs" t="Include" />
           <e p="Health.cs" t="Include" />
+          <e p="Managers" t="Include">
+            <e p="GameManager.cs" t="Include" />
+            <e p="MainMenuManager.cs" t="Include" />
+          </e>
           <e p="NPC.cs" t="Include" />
           <e p="NPCs" t="Include">
             <e p="Chicken" t="Include">

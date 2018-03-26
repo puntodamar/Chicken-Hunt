@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Managers;
 using UnityEngine;
 
 public class Health : MonoBehaviour
@@ -13,7 +14,7 @@ public class Health : MonoBehaviour
 
 	public void TakeDamage(int damage)
 	{
-		GameUIManager.Singleton.SubstractPlayerHealth(CurrentHealth, damage);
+		GameManager.Singleton.SubstractPlayerHealth(CurrentHealth, damage);
 		CurrentHealth -= damage;
 		//Debug.Log("take damage");
 		if (CurrentHealth < 0) CurrentHealth = 0;

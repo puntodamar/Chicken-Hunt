@@ -32,7 +32,7 @@ namespace Player
 			if (!Disabled)
 			{
 			
-				inputDirection			= new Vector3 (Input.GetAxisRaw ("Vertical1"), 0, -Input.GetAxisRaw ("Horizontal1")).normalized;
+				inputDirection			= new Vector3 (Input.GetAxisRaw ("Vertical"), 0, -Input.GetAxisRaw ("Horizontal")).normalized;
 				float inputMagnitude	= inputDirection.magnitude;
 				_animator.SetFloat("speed", inputMagnitude);
 				_smoothInputMagnitude	= Mathf.SmoothDamp(_smoothInputMagnitude, inputMagnitude, ref _smoothMoveVelocity, SmoothMoveTime);
