@@ -1,65 +1,53 @@
 ﻿using System.Collections;
+using Managers;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
 public enum GuardStatus { Patrolling, Pursuing, Idle, Searching, Distracted }
 
 public class Guard: NPC
 {
-	public GuardStatus status;
-	public float runSpeed = 10f;
-	public float searchPlayerRadius				= 5f;
-	public float minimumSearchDistance			= 2f;
+	public static System.Action OnPlayerDetected;
+	public static bool IsChasingPlayer = false;
+	
+	public GuardStatus Status;
+	public float RunSpeed = 6;
+	public float WalkSpeed = 3.5f;
+	public float SearchPlayerRadius				= 5f;
+	public float MinimumSearchDistance			= 2f;
 
 	[HideInInspector]
-	public bool canAttackPlayer					= false;
-	public bool canBeDistracted					= false;
+	public bool CanAttackPlayer					= false;
+	public bool CanBeDistracted					= false;
 
-	protected Vector3 lastKnownPlayerPosition;
-	protected bool goingBackToWaypoint			= false;
-	protected bool isLookingForPlayer			= false;
-	public float lostInterestToDistractor		= 0f;
-
+	protected Vector3 LastKnownPlayerPosition;
+	protected bool GoingBackToWaypoint			= false;
+	protected bool IsLookingForPlayer			= false;
+	public float LostInterestToDistractor		= 0f;
+	
+	
 	protected override void Start()
 	{
 		base.Start();
-		status = GuardStatus.Patrolling;
+		Status = GuardStatus.Patrolling;
+		GameManager.OnGameOver += Disable;
 	}
 
 	protected virtual void Update()
 	{
-		if (status == GuardStatus.Patrolling)
-		{
-			if(NavMeshAgent.remainingDistance <= .2f)
-				Animator.SetFloat("speed", 0);
 
-			if (NavMeshAgent.remainingDistance <= 0)
-				StartCoroutine(GoToNextWaypoint());
-
-			else Animator.SetFloat("speed", 1);
-		}
-
-		if(status == GuardStatus.Pursuing)
-		{
-			TimeToUpdateNavmeshDestination += Time.deltaTime;
-			Animator.SetFloat("speed", 1);
-			if (TimeToUpdateNavmeshDestination >= NavmeshUpdateRate && NavMeshAgent.destination != Player.transform.position)
-			{
-				lastKnownPlayerPosition = Player.transform.position;
-				NavMeshAgent.destination = lastKnownPlayerPosition;
-				TimeToUpdateNavmeshDestination = 0;
-			}
-		}
 	}
 
-	IEnumerator GoToNextWaypoint()
+	protected virtual IEnumerator GoToNextWaypoint()
 	{
-		status = GuardStatus.Idle;
-		
+		if (LostInterestToDistractor > 0) StopCoroutine(GoToNextWaypoint());
+		Status = GuardStatus.Idle;
+		Debug.Log("from parent");
 		float randomIdleTime = Random.Range(MinMaxWaitBeforeMovingToNextWaypoint.x, MinMaxWaitBeforeMovingToNextWaypoint.y);
 		yield return new WaitForSecondsRealtime(randomIdleTime);
 
 		CurrentWaypointIndex	= (CurrentWaypointIndex + 1) % Waypoints.transform.childCount;
-		status					= GuardStatus.Patrolling;
+		Status					= GuardStatus.Patrolling;
 		NavMeshAgent.SetDestination(Waypoints.GetChild(CurrentWaypointIndex).transform.position);
 		
 	}
@@ -67,19 +55,29 @@ public class Guard: NPC
 	protected virtual void OnStartChasingPlayer()
 	{
 		Animator.SetBool("running", true);
-		status = GuardStatus.Pursuing;
-		NavMeshAgent.speed = runSpeed;
+		Status = GuardStatus.Pursuing;
+		NavMeshAgent.speed = RunSpeed;
 		NavMeshAgent.SetDestination(Player.transform.position);
+
+		if (OnPlayerDetected != null)
+			OnPlayerDetected();
 	}
 
 	protected virtual void OnStartLosingPlayer()
 	{
-		status = GuardStatus.Searching;
+		IsChasingPlayer = false;
+		Status = GuardStatus.Searching;
 		NavMeshAgent.stoppingDistance = 0;
 	}
 
 	public override void DistractedTo(GameObject obj, float time)
 	{
-		status = GuardStatus.Distracted;
+		Status = GuardStatus.Distracted;
+		StopCoroutine(GoToNextWaypoint());
+	}
+
+	void Disable()
+	{
+		this.enabled = false;
 	}
 }

@@ -217,9 +217,13 @@
             <e p="TransformExtensionMethods.cs" t="Include" />
           </e>
           <e p="Health.cs" t="Include" />
+          <e p="LevelButton.cs" t="Include" />
           <e p="Managers" t="Include">
             <e p="GameManager.cs" t="Include" />
+            <e p="GameUIManager.cs" t="Include" />
+            <e p="LevelManager.cs" t="Include" />
             <e p="MainMenuManager.cs" t="Include" />
+            <e p="ScoreManager.cs" t="Include" />
           </e>
           <e p="NPC.cs" t="Include" />
           <e p="NPCs" t="Include">
@@ -229,7 +233,6 @@
             <e p="Dog" t="Include">
               <e p="DogFieldOfView.cs" t="Include" />
               <e p="GuardDog.cs" t="Include" />
-              <e p="WolfPatrol.cs" t="Include" />
             </e>
             <e p="FieldOfView.cs" t="Include" />
           </e>
@@ -246,6 +249,9 @@
               <e p="ThrowLure.cs" t="Include" />
               <e p="ThrowSkill.cs" t="Include" />
             </e>
+          </e>
+          <e p="Scriptables" t="Include">
+            <e p="LevelData.cs" t="Include" />
           </e>
           <e p="Stone.cs" t="Include" />
           <e p="ThrowObject.cs" t="Include" />

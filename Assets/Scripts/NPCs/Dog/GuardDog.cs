@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace NPCs.Dog
 {
@@ -15,7 +17,7 @@ namespace NPCs.Dog
 		{
 			base.Start();
 			_fov		= GetComponentInChildren<DogFieldOfView>();
-			status	= GuardStatus.Patrolling;
+			Status	= GuardStatus.Patrolling;
 
 			DogFieldOfView.OnDogHasSpottedPlayer += OnStartChasingPlayer;
 			DogFieldOfView.OnDogIsLosingPlayer += OnStartLosingPlayer;
@@ -23,56 +25,80 @@ namespace NPCs.Dog
 
 		protected override void Update()
 		{
-			base.Update();
 
-			if (goingBackToWaypoint)
+			if (Status == GuardStatus.Patrolling)
 			{
-				if (NavMeshAgent.remainingDistance <= 1)
-				{
-					Animator.SetBool("running", false);
-					status = GuardStatus.Patrolling;
-					NavMeshAgent.speed = OriginalSpeed;
-					goingBackToWaypoint = false;
-				}
+				if(NavMeshAgent.remainingDistance <= .2f)
+					Animator.SetFloat("speed", 0);
+
+				if (NavMeshAgent.remainingDistance <= 0)
+					StartCoroutine(GoToNextWaypoint());
+
+				else Animator.SetFloat("speed", 1);
 			}
 
-			if(status == GuardStatus.Distracted && lostInterestToDistractor > 0)
+			else if(Status == GuardStatus.Pursuing)
 			{
-				if(NavMeshAgent.remainingDistance == 0)
+				TimeToUpdateNavmeshDestination += Time.deltaTime;
+				Animator.SetFloat("speed", 1);
+				if (TimeToUpdateNavmeshDestination >= NavmeshUpdateRate && NavMeshAgent.destination != Player.transform.position)
 				{
-					lostInterestToDistractor -= Time.deltaTime;
+					LastKnownPlayerPosition = Player.transform.position;
+					NavMeshAgent.destination = LastKnownPlayerPosition;
+					TimeToUpdateNavmeshDestination = 0;
+				}
+			}
+			
+			
+			else if(Status == GuardStatus.Distracted && LostInterestToDistractor > 0)
+			{
+				if(Math.Abs(NavMeshAgent.remainingDistance) <= 0f)
+				{
+					LostInterestToDistractor -= Time.deltaTime;
 					Animator.SetFloat("speed", 0);
 				}
 				
 			}
+			
+			if (GoingBackToWaypoint)
+			{
+				if (NavMeshAgent.remainingDistance <= 1 && Status != GuardStatus.Distracted)
+				{
+					Animator.SetBool("running", false);
+					Status = GuardStatus.Patrolling;
+					NavMeshAgent.speed = OriginalSpeed;
+					GoingBackToWaypoint = false;
+				}
+			}
 
-			if(lostInterestToDistractor <= 0 && status == GuardStatus.Distracted)
+			if(LostInterestToDistractor <= 0 && Status == GuardStatus.Distracted)
 				ResumePatrolling();
-
-//			if (status == GuardStatus.Pursuing)
-//			{
-//				if(NavMeshAgent.remainingDistance < 4f)
-//					NavMeshAgent.stoppingDistance = 5f;
-//				else NavMeshAgent.stoppingDistance = 0f;
-//			}
 		}
 
-		IEnumerator GoToNextWaypoint()
+
+		private new IEnumerator GoToNextWaypoint()
 		{
-			status = GuardStatus.Idle;
+			if (LostInterestToDistractor > 0) StopCoroutine(GoToNextWaypoint());
+			Status = GuardStatus.Idle;
 			Animator.SetFloat("speed", 0);
 			float randomIdleTime = Random.Range(MinMaxWaitBeforeMovingToNextWaypoint.x, MinMaxWaitBeforeMovingToNextWaypoint.y);
 			yield return new WaitForSecondsRealtime(randomIdleTime);
 		
-			CurrentWaypointIndex = (CurrentWaypointIndex + 1) % Waypoints.transform.childCount;
-			NavMeshAgent.SetDestination(Waypoints.GetChild(CurrentWaypointIndex).transform.position);
-			status = GuardStatus.Patrolling;
+
+			if (LostInterestToDistractor == 0)
+			{
+				CurrentWaypointIndex = (CurrentWaypointIndex + 1) % Waypoints.transform.childCount;
+				NavMeshAgent.SetDestination(Waypoints.GetChild(CurrentWaypointIndex).transform.position);
+				Status = GuardStatus.Patrolling;
+				
+			}
+				
 		}
 
 		protected override void OnStartChasingPlayer()
 		{
 			base.OnStartChasingPlayer();
-			//NavMeshAgent.stoppingDistance = 4f;
+			NavMeshAgent.speed = RunSpeed;
 		}
 
 		protected IEnumerator LookingForPlayer()
@@ -82,7 +108,7 @@ namespace NPCs.Dog
 
 			while (attempts <= AttemptsToSearchNearbyLocations)
 			{
-				isLookingForPlayer = true;
+				IsLookingForPlayer = true;
 				yield return StartCoroutine(SearchRandomNearbyLocation());
 				attempts++;
 			}
@@ -92,11 +118,13 @@ namespace NPCs.Dog
 
 		protected virtual void ResumePatrolling()
 		{
+			Debug.Log("resume");
+			NavMeshAgent.speed = WalkSpeed;
 			NavMeshAgent.stoppingDistance = 0;
-			lostInterestToDistractor	= 0;
-			isLookingForPlayer			= false;
-			status						= GuardStatus.Patrolling;	
-			goingBackToWaypoint			= true;
+			LostInterestToDistractor	= 0;
+			IsLookingForPlayer			= false;
+			Status						= GuardStatus.Patrolling;	
+			GoingBackToWaypoint			= true;
 			NavMeshAgent.GoToShortestWaypointLocation(Waypoints, ref CurrentWaypointIndex);
 		}
 
@@ -114,20 +142,21 @@ namespace NPCs.Dog
 
 		protected IEnumerator SearchRandomNearbyLocation()
 		{
+			Debug.Log("search random");
 			Vector3 randomLocation					= Vector3.zero;
 			float distanceFromCurrentLocation		= 0;
 			do
 			{
-				randomLocation					= lastKnownPlayerPosition + (Vector3)Random.insideUnitCircle * searchPlayerRadius;
+				randomLocation					= LastKnownPlayerPosition + (Vector3)Random.insideUnitCircle * SearchPlayerRadius;
 				distanceFromCurrentLocation		= Vector3.Distance(transform.position, randomLocation);
 
 				_lastSearchLocation = randomLocation;
 			}
-			while (!IsNavmeshPositionValid(randomLocation) && distanceFromCurrentLocation < minimumSearchDistance);
+			while (!IsNavmeshPositionValid(randomLocation) && distanceFromCurrentLocation < MinimumSearchDistance);
 
 			NavMeshAgent.destination = randomLocation;
 
-			while (isLookingForPlayer)
+			while (IsLookingForPlayer)
 			{
 				yield return null;
 			}
@@ -139,21 +168,25 @@ namespace NPCs.Dog
 			StartCoroutine(LookingForPlayer());
 			NavMeshAgent.GoToShortestWaypointLocation(Waypoints, ref CurrentWaypointIndex);
 			//navMeshAgent.destination	= navMeshAgent.getsho(transform, waypoints, ref currentWaypointIndex);
-			goingBackToWaypoint			= true;
+			GoingBackToWaypoint			= true;
 		}
 
 		public override void DistractedTo(GameObject obj, float time)
 		{
+			StopCoroutine(GoToNextWaypoint());
+			//StopCoroutine(GoingBackToWaypoint());
+			StopCoroutine(LookingForPlayer());
+			LostInterestToDistractor = time;
 			base.DistractedTo(obj, time);
 
-			if (!IsNavmeshPositionValid(obj.transform.position)) return;
-
-			StopCoroutine(LookingForPlayer());
-			StopCoroutine(GoToNextWaypoint());
-
+			if (!IsNavmeshPositionValid(obj.transform.position))
+			{
+				ResumePatrolling();
+				LostInterestToDistractor = 0;
+			}
+				
 			Animator.SetFloat("speed", 1);
-			NavMeshAgent.SetDestination(obj.transform.position);
-			lostInterestToDistractor = time;
+			NavMeshAgent.SetDestination(obj.transform.position);		
 		}
 	}
 }

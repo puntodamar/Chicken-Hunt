@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Managers;
+using UnityEngine;
 
 namespace Player
 {
@@ -19,8 +20,9 @@ namespace Player
 
 		void Start()
 		{
-			_rigidbody	= PlayerManager.Singleton.PlayerRigidbody;
-			_animator	= PlayerManager.Singleton.PlayerAnimator;
+			_rigidbody	= GetComponent<Rigidbody>();
+			_animator	= GetComponent<Animator>();
+			GameManager.OnGameOver += Disable;
 		}
 
 		void Update ()
@@ -52,6 +54,11 @@ namespace Player
 				_rigidbody.MoveRotation(Quaternion.Euler(Vector3.up * _angle));
 				_rigidbody.MovePosition(_rigidbody.position + _velocity * Time.deltaTime);
 			}
+		}
+
+		void Disable()
+		{
+			this.enabled = false;
 		}
 	}
 }

@@ -5,9 +5,10 @@ public class ThrowObject : MonoBehaviour
 {
 	public Transform ObjectToThrow;
 	public int LineRendererCount	= 30;
-	public float ThrowHeight		= 25;
+	public float ThrowHeight		= 5;
 	public float Gravity			= -18;
 	public float Radius				= 10f;
+	
 	public new Camera Camera;
 
 	protected Vector3 LaunchPosition;

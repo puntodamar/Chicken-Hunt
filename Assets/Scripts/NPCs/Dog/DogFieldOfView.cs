@@ -37,9 +37,9 @@ namespace NPCs.Dog
 		{
 			if (CanSeePlayer())
 			{
-				if (_dog.status == GuardStatus.Idle || _dog.status == GuardStatus.Patrolling || _dog.status != GuardStatus.Patrolling)
+				if (_dog.Status == GuardStatus.Idle || _dog.Status == GuardStatus.Patrolling || _dog.Status != GuardStatus.Patrolling)
 					_playerVisibleTimer += Time.deltaTime;
-				if (_dog.status == GuardStatus.Pursuing || _dog.status == GuardStatus.Searching)
+				if (_dog.Status == GuardStatus.Pursuing || _dog.Status == GuardStatus.Searching)
 					_playerVisibleTimer = TimeToSpotPlayer;
 			}
 			else
@@ -47,7 +47,7 @@ namespace NPCs.Dog
 
 			
 
-			if (_dog.status != GuardStatus.Searching)
+			if (_dog.Status != GuardStatus.Searching)
 			{
 				_playerVisibleTimer = Mathf.Clamp(_playerVisibleTimer, 0, TimeToSpotPlayer);
 
@@ -55,7 +55,7 @@ namespace NPCs.Dog
 					Renderer.material.color = Color.Lerp(DefaultFovColor, Color.red, _playerVisibleTimer / TimeToSpotPlayer);
 			}
 
-			if (_playerVisibleTimer >= TimeToSpotPlayer && _dog.status != GuardStatus.Pursuing)
+			if (_playerVisibleTimer >= TimeToSpotPlayer && _dog.Status != GuardStatus.Pursuing)
 			{
 				if (OnDogHasSpottedPlayer != null)
 				{
@@ -63,7 +63,7 @@ namespace NPCs.Dog
 				}
 			}
 
-			if (_playerVisibleTimer == 0f && _dog.status == GuardStatus.Pursuing)
+			if (_playerVisibleTimer == 0f && _dog.Status == GuardStatus.Pursuing)
 			{
 				if (OnDogIsLosingPlayer != null)
 					OnDogIsLosingPlayer();
@@ -119,7 +119,7 @@ namespace NPCs.Dog
 
 		void HidePlayerFromGuard()
 		{
-			if (_dog.status != GuardStatus.Pursuing)
+			if (_dog.Status != GuardStatus.Pursuing)
 				_playerIsHiding = true;
 				
 		}

@@ -7,11 +7,11 @@ namespace Player.Skills
 	{
 		public int RemainingUsage		= 2;
 		public bool InfiniteJump		= true;
-
-		public Text RemainingUsageText;
-		public Image IconImage;
 		[HideInInspector]
 		public bool IsFinished;
+		
+		private Text _remainingUsageText;
+		private Image _iconImage;
 		private PlayerMovement _playerMovement;
 		private Animator _playerAnimator;
 
@@ -22,9 +22,10 @@ namespace Player.Skills
 			IsFinished				= true;
 			_playerAnimator			= PlayerManager.Singleton.PlayerAnimator;
 			_playerMovement			= GetComponent<PlayerMovement>();
-			//remainingUsageText		= GameObject.Find("RemainingJump").GetComponent<Text>();
-			RemainingUsageText.text = RemainingUsage.ToString();
+			_remainingUsageText		= GameObject.Find("RemainingJump").GetComponent<Text>();
+			_remainingUsageText.text = RemainingUsage.ToString();
 			PlayerManager.OnRespawn += ResetToRespawn;
+			_iconImage = GameObject.Find("JumpSkillIcon").GetComponent<Image>();
 		}
 
 		public void Deactivate()
@@ -88,9 +89,9 @@ namespace Player.Skills
 					if (!PlayerSkillManager.Singleton.infiniteSkill)
 						RemainingUsage--;
 
-					RemainingUsageText.text					= RemainingUsage.ToString();
+					_remainingUsageText.text					= RemainingUsage.ToString();
 					if (RemainingUsage == 0)
-						IconImage.color = Color.grey;
+						_iconImage.color = Color.grey;
 
 					IsFinished = true;
 					PlayerSkillManager.Singleton.skillInUse = SkillInUse.None;

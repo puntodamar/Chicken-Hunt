@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Managers;
 using NPCs.Dog;
 using UnityEngine;
 // ReSharper disable All
@@ -18,7 +19,7 @@ public class AttackPlayer : MonoBehaviour
 	protected virtual void Start()
 	{
 		//playerHealth = GetC
-		
+		GameManager.OnGameOver += Disable;
 		DogFieldOfView.OnDogIsLosingPlayer += OnStartLosingPlayer;
 	}
 
@@ -51,5 +52,10 @@ public class AttackPlayer : MonoBehaviour
 	private void OnStartLosingPlayer()
 	{
 		TimeToAttack = 0;
+	}
+
+	void Disable()
+	{
+		this.enabled = false;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Managers;
 using UnityEngine;
 
 namespace NPCs.Chicken
@@ -44,7 +45,8 @@ namespace NPCs.Chicken
 						InstantTurn(_corn.gameObject.transform);
 					}
 
-					else IsEatingCorn = true;
+					if (Vector3.Distance(_lastCornLocation, transform.position) < .6f)
+						IsEatingCorn = true;
 				}			
 
 				if (IsEatingCorn && !IsPecking)
@@ -107,6 +109,17 @@ namespace NPCs.Chicken
 			Animator.SetFloat("speed", 1);
 			Animator.SetBool("pecking", false);
 			NavMeshAgent.stoppingDistance = 0;
+			//avmeshUpdateRate = .1f;
+		}
+
+		private void OnTriggerEnter(Collider other)
+		{
+			if (!other.gameObject.CompareTag("Player")) return;
+			if (Guard.IsChasingPlayer) return;
+
+			GameManager.Singleton.ChickenCaught();
+			Destroy(gameObject);
 		}
 	}
+	
 }

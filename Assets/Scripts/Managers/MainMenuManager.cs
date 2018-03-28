@@ -15,17 +15,21 @@ namespace Managers
 			{
 				Transform levelTransform = Instantiate(LevelPrefab, SelectLevelPanel.transform);
 				Transform ratingTransform = levelTransform.GetChild(0);
+				Transform buttonTransform = levelTransform.GetChild(1);
+				buttonTransform.gameObject.GetComponent<LevelButton>().Level = i + 1;
 
 				CheckProgress(ratingTransform, i);
 
 				levelTransform.GetChild(1).GetComponentInChildren<Text>().text = (i + 1).ToString();
 			}
+			
+
 		}
 		void CheckProgress(Transform ratingTransform, int level)
 		{
 			if (PlayerPrefs.HasKey("Level" + level))
 			{
-				int ratingScore = PlayerPrefs.GetInt("Level" + level + "rating");
+				int ratingScore = PlayerPrefs.GetInt("Level" + level + "score");
 				ratingTransform.GetComponent<Slider>().value = ratingScore;
 			}
 			else ratingTransform.gameObject.SetActive(false);

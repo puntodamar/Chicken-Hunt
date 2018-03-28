@@ -19,7 +19,7 @@ public class DogAttackPlayer : AttackPlayer
 
 	private void Update()
 	{
-		if(_dog.status == GuardStatus.Pursuing)
+		if(_dog.Status == GuardStatus.Pursuing)
 		{
 			if (CanAttackPlayer())
 			{
@@ -27,6 +27,7 @@ public class DogAttackPlayer : AttackPlayer
 
 				if (TimeToAttack >= AttackCooldown)
 				{
+					Debug.Log("attack");
 					PlayerHealth.TakeDamage(AttackDamage);
 					TimeToAttack = 0;
 				}

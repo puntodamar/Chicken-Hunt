@@ -5,14 +5,19 @@ namespace Player.Skills
 {
 	public class ThrowDistractor : ThrowObject, ISkill
 	{
-		public int RemainingUsage = 2;
-		public Text RemainingUsageText;
+		public int RemainingUsage = 2;		
 		public Image IconImage;
+		
+		private Text _remainingUsageText;
+		//private Image _
+		
 		protected override void Start()
 		{
 			base.Start();
 			PlayerManager.OnRespawn += ResetToRespawn;
-			RemainingUsageText.text = RemainingUsage.ToString();
+			_remainingUsageText = GameObject.Find("RemainingStone").GetComponent<Text>();
+			_remainingUsageText.text = RemainingUsage.ToString();
+			IconImage = GameObject.Find("ThrowStoneIcon").GetComponent<Image>();
 		}
 
 		private void Update()
@@ -46,7 +51,7 @@ namespace Player.Skills
 					if (!PlayerSkillManager.Singleton.infiniteSkill)
 						RemainingUsage--;
 
-					RemainingUsageText.text = RemainingUsage.ToString();
+					_remainingUsageText.text = RemainingUsage.ToString();
 
 					if(RemainingUsage == 0)
 						IconImage.color = Color.gray;

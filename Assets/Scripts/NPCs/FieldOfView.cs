@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
+using Managers;
 using UnityEngine;
 
 namespace NPCs
 {
 	public class FieldOfView : MonoBehaviour
-	{
-	
+	{				
 		public float FovRadius	= 10f;
 		[Range(0, 360)]
 		public float ViewAngle = 100f, MeshResolution, EdgeDistanceTreshold;
@@ -28,30 +28,10 @@ namespace NPCs
 			ViewMeshFilter.mesh		= ViewMesh;
 			Renderer				= GetComponent<Renderer>();
 			Renderer.material.color = DefaultFovColor;
-			//StartCoroutine(FindTargetsWithDelay(2));
-		
+
+			GameManager.OnGameOver += Disable;
+
 		}
-
-		//protected void FindVisibleTargets()
-		//{
-		//	visibleTargets.Clear();
-		//	Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, FOVRadius, targetMask);
-
-		//	for (int i = 0; i < targetsInViewRadius.Length; i++)
-		//	{
-		//		Transform target = targetsInViewRadius[i].transform;
-		//		Vector3 directionToTarget = (target.position - transform.position).normalized;
-
-		//		if (Vector3.Angle(transform.forward, directionToTarget) < viewAngle / 2)
-		//		{
-		//			float distanceToTarget = Vector3.Distance(transform.position, target.position);
-		//			if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstacleMask))
-		//			{
-		//				visibleTargets.Add(target);
-		//			}
-		//		}
-		//	}
-		//}
 
 		protected void LateUpdate()
 		{
@@ -160,14 +140,10 @@ namespace NPCs
 			return new EdgeInfo(minPoint, maxPoint);
 
 		}
-
-		//protected IEnumerator FindTargetsWithDelay(float delay)
-		//{
-		//	while (true)
-		//	{
-		//		yield return new WaitForSeconds(delay);
-		//		FindVisibleTargets();
-		//	}
-		//}
+		
+		void Disable()
+		{
+			this.enabled = false;
+		}
 	}
 }

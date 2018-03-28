@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Managers;
 using Player.Skills;
 using UnityEngine;
 
@@ -27,6 +28,9 @@ public class PlayerSkillManager : MonoBehaviour
 			Singleton = this;
 		else if (Singleton != this)
 			Destroy(this);
+
+		Health.OnPlayerDied += OnPlayerDied;
+		GameManager.OnGameOver += Disable;
 	}
 
 	private void Update()
@@ -110,5 +114,20 @@ public class PlayerSkillManager : MonoBehaviour
 		else activatedSkill = null;
 			
 		
+	}
+
+	void OnPlayerDied()
+	{
+		skillInUse = SkillInUse.None;
+		runSkill.Deactivate();
+		jumpSkill.Deactivate();
+		throwLureSkill.Deactivate();
+		throwStoneSkill.Deactivate();
+	}
+	
+	void Disable()
+	{
+		this.enabled = false;
+		OnPlayerDied();
 	}
 }
