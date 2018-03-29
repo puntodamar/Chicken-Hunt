@@ -24,7 +24,7 @@ namespace Player.Skills
 			//_animator				= PlayerManager.Singleton.PlayerAnimator;	
 			_animator = GetComponent<Animator>();
 			_runCooldownSlider		= GameObject.Find("RunCooldownSlider").GetComponent<Image>();
-			if (PlayerSkillManager.Singleton.infiniteSkill)
+			if (PlayerSkillManager.Singleton.InfiniteSkill)
 				Cooldown = 2;
 		}
 

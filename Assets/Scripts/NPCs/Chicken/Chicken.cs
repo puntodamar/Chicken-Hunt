@@ -1,28 +1,37 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Extensions;
 using Managers;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace NPCs.Chicken
 {
 	public enum ChickenState { Idle, Moving, Lured }
 	public sealed class Chicken : NPC
 	{
+		public static System.Action OnChickenDead;
+		public static System.Action OnChickenIsNotInRange;
+		
 		public ChickenState ChickenState;
-		public float EatingSpeed	= .5f;
-		public int EatSubstraction	= 5;
+		public float EatingSpeed			= .5f;
+		public int EatSubstraction			= 5;
 		public bool IsPecking				= false;
 		public bool IsEatingCorn			= false;
+		public float Health 				= 100;
 		
 		private Corn _corn					= null;
 		private Vector3 _lastCornLocation	= Vector3.zero;
-		
+		public float _currentHealth;
+		private Slider _eatingProgress;
 
 		protected override void Start()
 		{
 			base.Start();
 			NavMeshAgent.updateRotation = false;
 			Animator.SetFloat("speed", (MoveAcrossWaypoints && Waypoints.childCount > 0) ? 1 : 0);
+			_eatingProgress = transform.FindDeepChild("EatSlider").GetComponent<Slider>();
+			_currentHealth = Health;
 		}
 
 		private void Update()
@@ -117,8 +126,33 @@ namespace NPCs.Chicken
 			if (!other.gameObject.CompareTag("Player")) return;
 			if (Guard.IsChasingPlayer) return;
 
-			GameManager.Singleton.ChickenCaught();
-			Destroy(gameObject);
+			other.gameObject.GetComponent<EatSkill>().CanEatChicken(true, this);
+			//Destroy(gameObject);
+		}
+
+		private void OnTriggerExit(Collider other)
+		{
+			if (!other.gameObject.CompareTag("Player")) return;
+
+			if (OnChickenIsNotInRange != null)
+				OnChickenIsNotInRange();
+		}
+
+		public void Eaten()
+		{
+			_currentHealth -= 25;
+			
+			if (_currentHealth == 0)
+			{
+				GameManager.Singleton.ChickenCaught();
+				if (OnChickenDead != null)
+					OnChickenDead();
+				Destroy(gameObject, .5f);
+			}
+			
+			float healthPercentage = _currentHealth / 100;
+			_eatingProgress.value = healthPercentage;
+
 		}
 	}
 	

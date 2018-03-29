@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Managers;
+using NPCs.Chicken;
 using Player.Skills;
 using UnityEngine;
 
@@ -14,14 +15,19 @@ public class PlayerSkillManager : MonoBehaviour
 {
 	public static PlayerSkillManager Singleton;
 
-	public bool infiniteSkill		= true;
-	public SkillInUse skillInUse	= SkillInUse.None;
-	public JumpSkill jumpSkill;
-	public RunSkill runSkill;
-	public ThrowSkill throwStoneSkill;
-	public ThrowSkill throwLureSkill;
-	public ISkill activatedSkill;
+	public bool InfiniteSkill		= true;
+	public SkillInUse SkillInUse	= SkillInUse.None;
+	public JumpSkill JumpSkill;
+	public RunSkill RunSkill;
+	public ThrowSkill ThrowStoneSkill;
+	public ThrowSkill ThrowLureSkill;
+	public ISkill ActivatedSkill;
+	public EatSkill EatSkill;
 
+	public float EatRate = 1f;
+	private bool _canEatChicken = false;
+	private float _timeToEat = 0;
+	
 	private void Awake()
 	{
 		if (Singleton == null)
@@ -31,103 +37,133 @@ public class PlayerSkillManager : MonoBehaviour
 
 		Health.OnPlayerDied += OnPlayerDied;
 		GameManager.OnGameOver += Disable;
+		EatSkill.ChickenIsInRange += OnChickenIsInRange;
+		Chicken.OnChickenDead += OnChickenDead;
+		Chicken.OnChickenIsNotInRange += OnChickenDead;
 	}
 
 	private void Update()
 	{
 		if (PlayerManager.Singleton.IsRespawning) return;
 
-		if (Input.GetKeyDown(KeyCode.Q) && jumpSkill.IsFinished)
+		if (Input.GetKeyDown(KeyCode.Q) && JumpSkill.IsFinished)
 		{
-			if (jumpSkill.RemainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
+			if (JumpSkill.RemainingUsage > 0 && (SkillInUse == SkillInUse.None || SkillInUse == SkillInUse.Run))
 			{
-				skillInUse = SkillInUse.Jump;
+				SkillInUse = SkillInUse.Jump;
 			}
 
-			else if (skillInUse == SkillInUse.Jump)
+			else if (SkillInUse == SkillInUse.Jump)
 			{
-				skillInUse = SkillInUse.None;
-				jumpSkill.Deactivate();
+				SkillInUse = SkillInUse.None;
+				JumpSkill.Deactivate();
 			}
 
 			else
 			{
-				skillInUse = SkillInUse.None;
-				jumpSkill.Deactivate();
+				SkillInUse = SkillInUse.None;
+				JumpSkill.Deactivate();
 			}
 		}
 		else if (Input.GetKeyDown(KeyCode.Alpha2))
 		{
-			if (throwStoneSkill.RemainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
+			if (ThrowStoneSkill.RemainingUsage > 0 && (SkillInUse == SkillInUse.None || SkillInUse == SkillInUse.Run))
 			{
 				//SwapSkill(jumpSkill);
-				skillInUse = SkillInUse.ThrowStone;
+				SkillInUse = SkillInUse.ThrowStone;
 
 			}
-			else if (skillInUse == SkillInUse.ThrowStone)
+			else if (SkillInUse == SkillInUse.ThrowStone)
 			{
-				skillInUse = SkillInUse.None;
-				throwStoneSkill.Deactivate();
+				SkillInUse = SkillInUse.None;
+				ThrowStoneSkill.Deactivate();
 			}
 			else
 			{
-				skillInUse = SkillInUse.None;
-				throwStoneSkill.Deactivate();
+				SkillInUse = SkillInUse.None;
+				ThrowStoneSkill.Deactivate();
 			}
 		}
 		else if (Input.GetKeyDown(KeyCode.Alpha3))
 		{
-			if (throwLureSkill.RemainingUsage > 0 && (skillInUse == SkillInUse.None || skillInUse == SkillInUse.Run))
+			if (ThrowLureSkill.RemainingUsage > 0 && (SkillInUse == SkillInUse.None || SkillInUse == SkillInUse.Run))
 			{
 				//SwapSkill(jumpSkill);
-				skillInUse = SkillInUse.Lure;
+				SkillInUse = SkillInUse.Lure;
 
 			}
-			else if (skillInUse == SkillInUse.Lure)
+			else if (SkillInUse == SkillInUse.Lure)
 			{
-				skillInUse = SkillInUse.None;
-				throwLureSkill.Deactivate();
+				SkillInUse = SkillInUse.None;
+				ThrowLureSkill.Deactivate();
 			}
 			else
 			{
-				skillInUse = SkillInUse.None;
-				throwLureSkill.Deactivate();
+				SkillInUse = SkillInUse.None;
+				ThrowLureSkill.Deactivate();
 			}
 		}
+		else if (Input.GetKey(KeyCode.Space))
+		{
+			if (_canEatChicken)
+			{
+				_timeToEat += Time.deltaTime;
+				if (_timeToEat >= EatRate)
+				{
+					_timeToEat = 0;
+					EatSkill.Eat();
+				}
+				
+			}
+				
+		}
+		
 		else if (Input.GetKeyDown(KeyCode.LeftShift))
 		{
-			runSkill.Activate();
+			RunSkill.Activate();
 		}
+		
+		
 	}
 
 	void SwapSkill(ISkill skill = null)
 	{
 		if (skill != null)
 		{
-			if (activatedSkill != null)
+			if (ActivatedSkill != null)
 			{
-				activatedSkill.Deactivate();
-				activatedSkill = skill;
+				ActivatedSkill.Deactivate();
+				ActivatedSkill = skill;
 			}
-			else activatedSkill = skill;
+			else ActivatedSkill = skill;
 		}
-		else activatedSkill = null;
+		else ActivatedSkill = null;
 			
 		
 	}
 
 	void OnPlayerDied()
 	{
-		skillInUse = SkillInUse.None;
-		runSkill.Deactivate();
-		jumpSkill.Deactivate();
-		throwLureSkill.Deactivate();
-		throwStoneSkill.Deactivate();
+		SkillInUse = SkillInUse.None;
+		RunSkill.Deactivate();
+		JumpSkill.Deactivate();
+		ThrowLureSkill.Deactivate();
+		ThrowStoneSkill.Deactivate();
 	}
 	
 	void Disable()
 	{
 		this.enabled = false;
 		OnPlayerDied();
+	}
+
+	void OnChickenIsInRange()
+	{
+		_canEatChicken = true;
+	}
+
+	void OnChickenDead()
+	{
+		_canEatChicken = false;
 	}
 }

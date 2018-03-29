@@ -1,4 +1,5 @@
-﻿using NPCs;
+﻿using Extensions;
+using NPCs;
 using NPCs.Dog;
 using UnityEngine;
 using UnityEditor;

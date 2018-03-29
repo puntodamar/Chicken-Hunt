@@ -19,7 +19,11 @@ namespace Managers
 		private void Start()
 		{
 			if (Singleton == null)
+			{
 				Singleton = this;
+				DontDestroyOnLoad(this);
+			}
+				
 			else if (Singleton != this)
 				Destroy(this);
 			SceneManager.sceneLoaded += OnGameSceneLoaded;						
@@ -46,7 +50,7 @@ namespace Managers
 		{
 			_caughtChickens++;
 
-			if (_caughtChickens == TotalChickenToEat)
+			if (_caughtChickens >= TotalChickenToEat)
 			{
 				if (OnGameOver != null)
 					OnGameOver();

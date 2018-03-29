@@ -38,7 +38,7 @@ namespace Player.Skills
 
 		void Update()
 		{
-			if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump)
+			if (PlayerSkillManager.Singleton.SkillInUse == SkillInUse.Jump)
 			{
 			
 				if (!IsBeingThrown)
@@ -75,7 +75,7 @@ namespace Player.Skills
 
 		private void OnCollisionEnter(Collision collision)
 		{
-			if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump && IsBeingThrown)
+			if (PlayerSkillManager.Singleton.SkillInUse == SkillInUse.Jump && IsBeingThrown)
 			{
 				if (collision.gameObject.CompareTag("Ground"))
 				{
@@ -86,7 +86,7 @@ namespace Player.Skills
 					IsBeingThrown			= false;				
 					_playerMovement.Disabled = false;
 
-					if (!PlayerSkillManager.Singleton.infiniteSkill)
+					if (!PlayerSkillManager.Singleton.InfiniteSkill)
 						RemainingUsage--;
 
 					_remainingUsageText.text					= RemainingUsage.ToString();
@@ -94,14 +94,14 @@ namespace Player.Skills
 						_iconImage.color = Color.grey;
 
 					IsFinished = true;
-					PlayerSkillManager.Singleton.skillInUse = SkillInUse.None;
+					PlayerSkillManager.Singleton.SkillInUse = SkillInUse.None;
 				}
 			}
 		}
 
 		private void OnTriggerEnter(Collider other)
 		{
-			if (PlayerSkillManager.Singleton.skillInUse == SkillInUse.Jump && IsBeingThrown)
+			if (PlayerSkillManager.Singleton.SkillInUse == SkillInUse.Jump && IsBeingThrown)
 			{
 				if (other.gameObject.CompareTag("Chicken"))
 				{

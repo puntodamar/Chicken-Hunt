@@ -195,6 +195,12 @@
         </e>
         <e p="Scripts" t="Include">
           <e p="AttackPlayer.cs" t="Include" />
+          <e p="Buttons" t="Include">
+            <e p="LevelButton.cs" t="Include" />
+            <e p="NextLevelButton.cs" t="Include" />
+            <e p="ReplayButton.cs" t="Include" />
+            <e p="WorldCanvas.cs" t="Include" />
+          </e>
           <e p="Camera" t="Include">
             <e p="CameraControl.cs" t="Include" />
           </e>
@@ -217,7 +223,6 @@
             <e p="TransformExtensionMethods.cs" t="Include" />
           </e>
           <e p="Health.cs" t="Include" />
-          <e p="LevelButton.cs" t="Include" />
           <e p="Managers" t="Include">
             <e p="GameManager.cs" t="Include" />
             <e p="GameUIManager.cs" t="Include" />
@@ -240,6 +245,7 @@
             <e p="PlayerMovement.cs" t="Include" />
             <e p="Rotation.cs" t="Include" />
             <e p="Skills" t="Include">
+              <e p="EatSkill.cs" t="Include" />
               <e p="HideSkill.cs" t="Include" />
               <e p="ISkill.cs" t="Include" />
               <e p="JumpSkill.cs" t="Include" />

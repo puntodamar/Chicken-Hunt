@@ -29,11 +29,15 @@ public class NPC : MonoBehaviour
 		Player			= GameObject.FindGameObjectWithTag("Player").transform;
 		OriginalSpeed	= NavMeshAgent.speed;
 
+		if(Waypoints == null) MoveAcrossWaypoints = false;
+		
 		if (MoveAcrossWaypoints && NavMeshAgent.enabled)
 		{
 			NavMeshAgent.Warp(transform.position);
 			NavMeshAgent.SetDestination(Waypoints.GetChild(CurrentWaypointIndex).transform.position);
 		}
+		
+		
 	}
 
 	public virtual void DistractedTo(GameObject obj, float time)
@@ -43,7 +47,7 @@ public class NPC : MonoBehaviour
 
 	protected void OnDrawGizmos()
 	{
-		if (Waypoints.childCount == 0) return;
+		if ( Waypoints == null || Waypoints.childCount == 0 ) return;
 
 		Vector3 startPosition		= Waypoints.GetChild(0).position;
 		Vector3 previousPosition	= startPosition;

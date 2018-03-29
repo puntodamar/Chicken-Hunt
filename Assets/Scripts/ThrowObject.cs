@@ -45,7 +45,7 @@ public class ThrowObject : MonoBehaviour
 
 	protected void SetTargetLocation()
 	{
-		if (!BullsEye.activeInHierarchy && !IsBeingThrown && PlayerSkillManager.Singleton.skillInUse != SkillInUse.None)
+		if (!BullsEye.activeInHierarchy && !IsBeingThrown && PlayerSkillManager.Singleton.SkillInUse != SkillInUse.None)
 			BullsEye.SetActive(true);
 
 		Ray cameraRay = Camera.ScreenPointToRay(Input.mousePosition);
@@ -104,7 +104,7 @@ public class ThrowObject : MonoBehaviour
 			IsBeingThrown			= false;
 			LineRenderer.enabled	= true;
 			BullsEye.SetActive(false);
-			PlayerSkillManager.Singleton.skillInUse = SkillInUse.None;
+			PlayerSkillManager.Singleton.SkillInUse = SkillInUse.None;
 		}	
 	}
 }

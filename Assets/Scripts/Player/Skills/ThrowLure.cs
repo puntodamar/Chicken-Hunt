@@ -18,7 +18,7 @@ namespace Player.Skills
 
 		private void Update()
 		{
-			if (PlayerSkillManager.Singleton.skillInUse != SkillInUse.Lure) return;
+			if (PlayerSkillManager.Singleton.SkillInUse != SkillInUse.Lure) return;
 			if (!IsBeingThrown)
 			{
 				if (!BullsEye.activeInHierarchy)
@@ -43,7 +43,7 @@ namespace Player.Skills
 				TargetRigidbody = Instantiate(ObjectToThrow, LaunchPosition, Quaternion.identity).GetComponent<Rigidbody>();
 				Throw();
 				HasTarget = false;
-				if (!PlayerSkillManager.Singleton.infiniteSkill)
+				if (!PlayerSkillManager.Singleton.InfiniteSkill)
 					RemainingUsage--;
 
 				RemainingUsageText.text = RemainingUsage.ToString();
@@ -51,7 +51,7 @@ namespace Player.Skills
 				if (RemainingUsage == 0)
 					IconImage.color = Color.gray;
 
-				PlayerSkillManager.Singleton.skillInUse = SkillInUse.None;
+				PlayerSkillManager.Singleton.SkillInUse = SkillInUse.None;
 				Deactivate();
 
 			}

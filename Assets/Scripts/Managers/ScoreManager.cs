@@ -16,7 +16,13 @@ namespace Managers
     
         private void Awake()
         {
-            Singleton = this;
+            if (Singleton == null)
+            {
+                Singleton = this;
+                DontDestroyOnLoad(this);
+            }
+            else if(Singleton != this)
+                Destroy(this);
         }
 
         private void Start()
