@@ -243,7 +243,6 @@
           </e>
           <e p="Player" t="Include">
             <e p="PlayerMovement.cs" t="Include" />
-            <e p="Rotation.cs" t="Include" />
             <e p="Skills" t="Include">
               <e p="EatSkill.cs" t="Include" />
               <e p="HideSkill.cs" t="Include" />
@@ -255,7 +254,9 @@
               <e p="ThrowLure.cs" t="Include" />
               <e p="ThrowSkill.cs" t="Include" />
             </e>
+            <e p="ThrowRotation.cs" t="Include" />
           </e>
+          <e p="Rotate.cs" t="Include" />
           <e p="Scriptables" t="Include">
             <e p="LevelData.cs" t="Include" />
           </e>
